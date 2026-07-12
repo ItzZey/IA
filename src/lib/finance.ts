@@ -241,6 +241,16 @@ function stripHtml(text: string) {
 
 function translateTitle(title: string) {
   const replacements: Array<[RegExp, string]> = [
+    [/Could Be ([\d.,]+)% Undervalued On Its LNG Growth Narrative/gi, "pourrait etre sous-valorisee de $1 % selon son scenario de croissance GNL"],
+    [/Ships First Mexico LNG Cargo And Exits European Rooftop Solar/gi, "expedie son premier cargo GNL depuis le Mexique et sort du solaire distribue en Europe"],
+    [/LNG/gi, "GNL"],
+    [/liquefied natural gas/gi, "gaz naturel liquefie"],
+    [/undervalued/gi, "sous-valorisee"],
+    [/growth narrative/gi, "scenario de croissance"],
+    [/ships first/gi, "expedie son premier"],
+    [/cargo/gi, "cargo"],
+    [/exits/gi, "sort de"],
+    [/rooftop solar/gi, "solaire en toiture"],
     [/dividend stocks?/gi, "actions a dividendes"],
     [/dividend/gi, "dividende"],
     [/stocks?/gi, "actions"],
@@ -257,10 +267,42 @@ function translateTitle(title: string) {
   return replacements.reduce((value, [pattern, replacement]) => value.replace(pattern, replacement), title);
 }
 
+function translateFinancialText(text: string) {
+  const replacements: Array<[RegExp, string]> = [
+    [/has shipped its first/gi, "a expedie son premier"],
+    [/newly commissioned/gi, "nouvellement mis en service"],
+    [/liquefied natural gas/gi, "gaz naturel liquefie"],
+    [/LNG/gi, "GNL"],
+    [/from the ECA GNL Phase 1 terminal in Mexico to Asia/gi, "depuis le terminal ECA GNL Phase 1 au Mexique vers l'Asie"],
+    [/from the ECA LNG Phase 1 terminal in Mexico to Asia/gi, "depuis le terminal ECA LNG Phase 1 au Mexique vers l'Asie"],
+    [/highlighting/gi, "ce qui met en avant"],
+    [/long-term offtake role/gi, "un role d'acheteur a long terme"],
+    [/exposure to Pacific Basin gas flows/gi, "une exposition aux flux gaziers du bassin Pacifique"],
+    [/See our latest analysis for/gi, "Voir la derniere analyse sur"],
+    [/The LNG milestone comes after/gi, "Cette etape dans le GNL intervient apres"],
+    [/a mixed period for the stock/gi, "une periode contrastee pour l'action"],
+    [/share price/gi, "cours de l'action"],
+    [/total shareholder return/gi, "rendement total pour l'actionnaire"],
+    [/The company has exited distributed solar generation/gi, "L'entreprise est sortie de la production solaire distribuee"],
+    [/selling its rooftop solar portfolio/gi, "en vendant son portefeuille solaire en toiture"],
+    [/The moves highlight a shift toward/gi, "Ces mouvements montrent un recentrage vers"],
+    [/North American/gi, "nord-americain"],
+    [/renewable projects/gi, "projets renouvelables"],
+    [/global multi-energy company/gi, "groupe mondial multi-energies"],
+    [/oil, gas and renewables/gi, "petrole, gaz et renouvelables"],
+    [/undervalued/gi, "sous-valorisee"],
+    [/growth/gi, "croissance"],
+    [/risk/gi, "risque"],
+    [/opportunity/gi, "opportunite"]
+  ];
+
+  return replacements.reduce((value, [pattern, replacement]) => value.replace(pattern, replacement), text);
+}
+
 function classifyNews(title: string, summary: string, themes: string[]): Pick<NewsItem, "impact" | "importance" | "tags"> {
   const text = `${title} ${summary}`.toLowerCase();
-  const riskWords = ["cut", "debt", "lawsuit", "probe", "warning", "fall", "drop", "downgrade", "risk", "weak"];
-  const opportunityWords = ["buy", "upgrade", "growth", "raise", "record", "strong", "beat", "expansion", "opportunity"];
+  const riskWords = ["cut", "debt", "lawsuit", "probe", "warning", "fall", "drop", "downgrade", "risk", "weak", "proces", "vigilance", "baisse", "dette", "critique", "faiblesse"];
+  const opportunityWords = ["buy", "upgrade", "growth", "raise", "record", "strong", "beat", "expansion", "opportunity", "croissance", "progresse", "hausse", "cession", "expedie", "renouvelables"];
   const matchedThemes = themes.filter((theme) => text.includes(theme.toLowerCase().split(" ")[0]));
   const riskHits = riskWords.filter((word) => text.includes(word)).length;
   const opportunityHits = opportunityWords.filter((word) => text.includes(word)).length;
@@ -272,7 +314,7 @@ function classifyNews(title: string, summary: string, themes: string[]): Pick<Ne
 }
 
 async function getNews(ticker: string, themes: string[]): Promise<NewsItem[]> {
-  const rss = await fetchText(`https://feeds.finance.yahoo.com/rss/2.0/headline?s=${encodeURIComponent(ticker)}&region=US&lang=en-US`);
+  const rss = await fetchText(`https://feeds.finance.yahoo.com/rss/2.0/headline?s=${encodeURIComponent(ticker)}&region=FR&lang=fr-FR`);
   if (!rss) return [];
 
   const items = [...rss.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 12);
@@ -282,7 +324,7 @@ async function getNews(ticker: string, themes: string[]): Promise<NewsItem[]> {
     const title = translateTitle(rawTitle);
     const link = stripHtml(item.match(/<link>([\s\S]*?)<\/link>/)?.[1] || "#");
     const publishedAt = stripHtml(item.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1] || "");
-    const summary = stripHtml(item.match(/<description>([\s\S]*?)<\/description>/)?.[1] || "");
+    const summary = translateFinancialText(stripHtml(item.match(/<description>([\s\S]*?)<\/description>/)?.[1] || ""));
     const classified = classifyNews(rawTitle, summary, themes);
     return {
       title,
