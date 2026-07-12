@@ -3,7 +3,6 @@ from pathlib import Path
 from html import escape
 
 import pandas as pd
-import plotly.graph_objects as go
 import streamlit as st
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -189,19 +188,15 @@ score_items = [
 for col, (label, key) in zip(score_row_1 + score_row_2, score_items):
     render_card(col, label, f"{analysis['scores'][key]}/100")
 
-fig = go.Figure()
-fig.add_trace(go.Candlestick(
-    x=prices["date"],
-    open=prices["open"],
-    high=prices["high"],
-    low=prices["low"],
-    close=prices["close"],
-    name="Prix",
-))
-fig.add_hline(y=analysis["levels"]["support"], line_dash="dot", annotation_text="Support")
-fig.add_hline(y=analysis["levels"]["resistance"], line_dash="dot", annotation_text="Resistance")
-fig.update_layout(height=460, xaxis_rangeslider_visible=False, margin=dict(l=20, r=20, t=20, b=20))
-st.plotly_chart(fig, use_container_width=True)
+chart_data = prices[["date", "close"]].copy()
+chart_data["support"] = analysis["levels"]["support"]
+chart_data["resistance"] = analysis["levels"]["resistance"]
+chart_data = chart_data.set_index("date")
+st.line_chart(
+    chart_data.rename(columns={"close": "Prix", "support": "Support", "resistance": "Resistance"}),
+    use_container_width=True,
+    height=460,
+)
 
 left, right = st.columns([1, 1])
 with left:
