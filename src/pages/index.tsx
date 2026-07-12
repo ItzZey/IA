@@ -27,12 +27,30 @@ function Metric({ label, value, helper, tone = "neutral" }: { label: string; val
   );
 }
 
+function scoreTone(value: number) {
+  if (value >= 70) return "good";
+  if (value >= 50) return "warning";
+  return "danger";
+}
+
+function scoreLabel(value: number) {
+  if (value >= 80) return "Tres bon";
+  if (value >= 70) return "Bon";
+  if (value >= 50) return "Moyen";
+  return "A surveiller";
+}
+
 function ScoreBar({ label, value }: { label: string; value: number }) {
+  const tone = scoreTone(value);
+
   return (
-    <div className="score-row">
-      <div>
+    <div className={`score-row score-${tone}`}>
+      <div className="score-row-header">
         <span>{label}</span>
-        <strong>{formatNumber(value)}/100</strong>
+        <div>
+          <em>{scoreLabel(value)}</em>
+          <strong>{formatNumber(value)}/100</strong>
+        </div>
       </div>
       <div className="score-track" aria-hidden="true">
         <i style={{ width: `${Math.max(3, Math.min(100, value))}%` }} />
@@ -189,9 +207,10 @@ export default function Page() {
                     <h2>{data.name}</h2>
                     <p>{data.sector} - source : {data.source}</p>
                   </div>
-                  <div className={`score-badge ${data.scoreGlobal >= 70 ? "score-good" : data.scoreGlobal >= 50 ? "score-mid" : "score-low"}`}>
+                  <div className={`score-badge score-${scoreTone(data.scoreGlobal)}`}>
                     <strong>{formatNumber(data.scoreGlobal)}</strong>
                     <span>/100</span>
+                    <small>{scoreLabel(data.scoreGlobal)}</small>
                   </div>
                 </div>
                 <PriceChart history={data.history} />

@@ -292,7 +292,7 @@ h1 {
 
 .score-badge {
   min-width: 96px;
-  height: 96px;
+  min-height: 104px;
   display: grid;
   place-content: center;
   text-align: center;
@@ -303,18 +303,26 @@ h1 {
 
 .score-badge strong {
   font-size: 2rem;
+  line-height: 1;
 }
 
 .score-badge span {
   color: currentColor;
 }
 
-.score-mid {
+.score-badge small {
+  margin-top: 6px;
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.score-warning {
   background: #fff7ed;
   color: var(--amber);
 }
 
-.score-low {
+.score-danger {
   background: #fef2f2;
   color: var(--red);
 }
@@ -411,14 +419,31 @@ h1 {
   margin-bottom: 14px;
 }
 
-.score-row > div:first-child {
+.score-row-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
 }
 
 .score-row span {
   color: var(--muted);
+}
+
+.score-row-header div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.score-row em {
+  min-height: 24px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-style: normal;
+  font-weight: 850;
+  white-space: nowrap;
 }
 
 .score-track {
@@ -432,7 +457,48 @@ h1 {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--teal), var(--blue));
+}
+
+.score-good strong {
+  color: var(--green);
+}
+
+.score-good em,
+.score-good .score-track i {
+  background: #dcfce7;
+  color: var(--green);
+}
+
+.score-good .score-track i {
+  background: linear-gradient(90deg, #16a34a, #0f766e);
+}
+
+.score-warning strong {
+  color: var(--amber);
+}
+
+.score-warning em,
+.score-warning .score-track i {
+  background: #fef3c7;
+  color: var(--amber);
+}
+
+.score-warning .score-track i {
+  background: linear-gradient(90deg, #f59e0b, #b7791f);
+}
+
+.score-danger strong {
+  color: var(--red);
+}
+
+.score-danger em,
+.score-danger .score-track i {
+  background: #fee2e2;
+  color: var(--red);
+}
+
+.score-danger .score-track i {
+  background: linear-gradient(90deg, #ef4444, #b42318);
 }
 
 .mini-grid {
